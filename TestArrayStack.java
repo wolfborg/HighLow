@@ -1,4 +1,4 @@
-package Maze;
+package HighLow;
 
 public class TestArrayStack
 {

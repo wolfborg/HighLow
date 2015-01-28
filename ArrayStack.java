@@ -1,4 +1,4 @@
-package Maze;
+package HighLow;
 
 import java.util.Arrays;
 
