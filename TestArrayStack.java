@@ -36,6 +36,9 @@ public class TestArrayStack
 		testPush(stack,stackTest2);
 		testSize(stack,27);
 		testPeek(stack,stackTest2[stackTest2.length-1]);
+		
+		testClear(stack);
+		testPeek(stack,null);
 	}
 	
 	private static void testSize(StackInterface<String> stack, int correct)
@@ -139,6 +142,21 @@ public class TestArrayStack
 		System.out.println("New top of stack should be '"+stackTest+"'");
 		System.out.print("Top of stack is "+stack.peek()+": ");
 		if(stack.peek()==stackTest){
+			System.out.println("OK");
+		}else{
+			System.out.println("ERROR");
+		}
+		
+		System.out.println();
+	}
+	
+	private static void testClear(StackInterface<String> stack)
+	{
+		System.out.print("Testing clear(): ");
+		
+		stack.clear();
+		
+		if(stack.isEmpty()){
 			System.out.println("OK");
 		}else{
 			System.out.println("ERROR");

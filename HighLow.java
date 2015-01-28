@@ -1,5 +1,7 @@
 package HighLow;
 
+import java.util.Scanner;
+
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JLabel;
@@ -14,20 +16,79 @@ import java.awt.event.KeyListener;
 @SuppressWarnings("serial")
 public class HighLow extends JFrame implements ActionListener, KeyListener
 {
-	private StackInterface<String> stack;
-	private String[] cards;
-	
-	private enum Rank{DEUCE,THREE,FOUR,FIVE,SIX,SEVEN,EIGHT,NINE,TEN,JACK,QUEEN,KING,ACE};
-	private enum Suit{SPADES,CLUBS,HEARTS,DIAMONDS};
+	private Scanner keyboard = new Scanner(System.in);
+	private Deck deck;
+	private StackInterface<Card> stackDeck;
+	private StackInterface<Card> stackGame;
 	
 	public static void main(String[] args)
 	{
-		new HighLow();
+		HighLow highlow = new HighLow();
+		
+		highlow.stackDeck.peek();
 	}
 	
 	public HighLow()
+	{ 
+		deck = new Deck();
+		stackGame = new ArrayStack<Card>(52);
+		game();
+	}
+	
+	public void game()
 	{
-		stack = new ArrayStack<String>(52);
+		stackDeck = deck.shuffle();
+		
+		String guess, answer;
+		
+		while(!isEnd()){
+			stackGame.push(stackDeck.peek());
+			stackDeck.pop();
+			
+			System.out.println("Card"+stackGame.size()+" is the "+stackGame.peek().toString());
+			System.out.print("High or Low: "); guess = keyboard.next();
+			
+			if(stackDeck.peek().getRank().getRankValue()<=stackGame.peek().getRank().getRankValue()){
+				answer = "low";
+			}else{
+				answer = "high";
+			}
+			
+			if(guess.equals(answer)){
+				System.out.println("Correct!");
+			}else{
+				System.out.println("Incorrect!");
+				gameover();
+				break;
+			}
+			
+			System.out.println();
+		}
+	}
+	
+	public boolean isEnd()
+	{
+		if(stackGame.size()==52){
+			victory();
+		}
+		
+		return false;
+	}
+	
+	public void victory()
+	{
+		System.out.println("You Win!");
+	}
+	
+	public void gameover()
+	{
+		System.out.println();
+		System.out.println("Next card was "+stackDeck.peek());
+		
+		System.out.println();
+		System.out.println("Score: "+stackGame.size());
+		System.out.println("Game Over");
+		System.out.println("Play Again?");
 	}
 	
 	public void gui()
@@ -35,17 +96,17 @@ public class HighLow extends JFrame implements ActionListener, KeyListener
 		Container pane = getContentPane();
 		FlowLayout flo = new FlowLayout();
 		
-		setTitle("Maze");
+		setTitle("HighLow");
 		setLocation(200,200);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		
 		JPanel title = new JPanel();
 		JPanel game = new JPanel();
 		
-		JLabel level = new JLabel("Level0");
+		JLabel label0 = new JLabel("Level0");
 		
 		pane.setLayout(flo);
-		title.add(level);
+		title.add(label0);
 		
 		pane.add(title);
 		pane.add(game);

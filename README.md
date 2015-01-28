@@ -1,17 +1,17 @@
-"Maze"												
+"HighLow"												
 =====================================================================
 Author: Derek Chaplin
 
 Description:
-For my implementation of a Stack ADT using an array, I made a maze
-game which uses stacks. The program will allow the user to solve the
-maze as well as have an option to allow the computer to solve it.
-It also will have a graphic interface using JFrames and the user can
-control their in-game movements using the WASD or arrow keys.
+For my implementation of a Stack ADT using an array, I made a high/low
+card game which uses stacks. The program will allow the user to play
+a card game in which the goal is to guess whether the current card's
+value will be either higher or lower than the next card's value until
+the user reaches the last card in the deck and wins.
 
 Goals:
--Users can solve several maze games.
--Users can have the computer solve maze games.
--Program will have a graphic user interface.
--Implements Stack ADT using an array.
--Has the capability to have more mazes added.
+Users can play a game of high/low.
+Users can play as many games as they want.
+Program will keep track of the user's highest score each session.
+Program will have a graphic user interface.
+Implements Stack ADT using an array.

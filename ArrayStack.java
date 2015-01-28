@@ -12,7 +12,6 @@ public class ArrayStack<E> implements StackInterface<E>
 	{
 		if(topIndex==stack.length-1){
 			stack = Arrays.copyOf(stack, 2*stack.length);
-			System.out.println("Stack Capacity Doubled");
 		}
 	}
 	
@@ -76,5 +75,12 @@ public class ArrayStack<E> implements StackInterface<E>
 		}
 		
 		return top;
+	}
+
+	public void clear()
+	{
+		while(!isEmpty()){
+			pop();
+		}
 	}
 }
