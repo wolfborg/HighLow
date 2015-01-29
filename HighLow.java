@@ -2,6 +2,7 @@ package HighLow;
 
 import java.util.Scanner;
 
+import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JLabel;
@@ -32,6 +33,7 @@ public class HighLow extends JFrame implements ActionListener, KeyListener
 	{ 
 		deck = new Deck();
 		stackGame = new ArrayStack<Card>(52);
+		gui();
 		game();
 	}
 	
@@ -46,15 +48,21 @@ public class HighLow extends JFrame implements ActionListener, KeyListener
 			stackDeck.pop();
 			
 			System.out.println("Card"+stackGame.size()+" is the "+stackGame.peek().toString());
+			
 			System.out.print("High or Low: "); guess = keyboard.next();
 			
-			if(stackDeck.peek().getRank().getRankValue()<=stackGame.peek().getRank().getRankValue()){
+			
+			if(stackDeck.peek().getRank().getRankValue()<stackGame.peek().getRank().getRankValue()){
 				answer = "low";
-			}else{
+			}else if(stackDeck.peek().getRank().getRankValue()>stackGame.peek().getRank().getRankValue()){
 				answer = "high";
+			}else{
+				answer = "tie";
 			}
 			
-			if(guess.equals(answer)){
+			if(answer.equals("tie")){
+				System.out.println("Tied");
+			}else if(guess.equals(answer)){
 				System.out.println("Correct!");
 			}else{
 				System.out.println("Incorrect!");
@@ -88,7 +96,15 @@ public class HighLow extends JFrame implements ActionListener, KeyListener
 		System.out.println();
 		System.out.println("Score: "+stackGame.size());
 		System.out.println("Game Over");
+		
 		System.out.println("Play Again?");
+		String answer = keyboard.next();
+		if(answer.equals("yes")){
+			stackGame.clear();
+			game();
+		}else{
+			System.exit(0);
+		}
 	}
 	
 	public void gui()
@@ -103,6 +119,9 @@ public class HighLow extends JFrame implements ActionListener, KeyListener
 		JPanel title = new JPanel();
 		JPanel game = new JPanel();
 		
+		JButton high = new JButton("High");
+		JButton low = new JButton("Low");
+		
 		JLabel label0 = new JLabel("Level0");
 		
 		pane.setLayout(flo);
@@ -110,6 +129,8 @@ public class HighLow extends JFrame implements ActionListener, KeyListener
 		
 		pane.add(title);
 		pane.add(game);
+		pane.add(high);
+		pane.add(low);
 		
 		addKeyListener(this);
 		

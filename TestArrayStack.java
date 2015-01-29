@@ -39,6 +39,8 @@ public class TestArrayStack
 		
 		testClear(stack);
 		testPeek(stack,null);
+		testIsEmpty(stack,true);
+		testSize(stack,0);
 	}
 	
 	private static void testSize(StackInterface<String> stack, int correct)
