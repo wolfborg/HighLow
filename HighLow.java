@@ -6,16 +6,17 @@ import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JLabel;
+import javax.swing.KeyStroke;
 
+import java.awt.BorderLayout;
 import java.awt.Container;
-import java.awt.FlowLayout;
+import java.awt.Dimension;
+import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
 
 @SuppressWarnings("serial")
-public class HighLow extends JFrame implements ActionListener, KeyListener
+public class HighLow extends JFrame implements ActionListener
 {
 	private Scanner keyboard = new Scanner(System.in);
 	private Deck deck;
@@ -24,9 +25,7 @@ public class HighLow extends JFrame implements ActionListener, KeyListener
 	
 	public static void main(String[] args)
 	{
-		HighLow highlow = new HighLow();
-		
-		highlow.stackDeck.peek();
+		new HighLow();
 	}
 	
 	public HighLow()
@@ -34,7 +33,7 @@ public class HighLow extends JFrame implements ActionListener, KeyListener
 		deck = new Deck();
 		stackGame = new ArrayStack<Card>(52);
 		gui();
-		game();
+		//game();
 	}
 	
 	public void game()
@@ -60,19 +59,30 @@ public class HighLow extends JFrame implements ActionListener, KeyListener
 				answer = "tie";
 			}
 			
+			while(!guess.equals("high")&&!guess.equals("low")){
+				System.out.println("Invalid Input");
+				System.out.println();
+				System.out.print("High or Low: "); guess = keyboard.next();
+			}
+			
+			System.out.println();
+			
 			if(answer.equals("tie")){
 				System.out.println("Tied");
-			}else if(guess.equals(answer)){
-				System.out.println("Correct!");
-			}else{
-				System.out.println("Incorrect!");
-				gameover();
-				break;
+			}else if(guess.equals("high")||guess.equals("low")){
+				if(guess.equals(answer)){
+					System.out.println("Correct!");
+				}else{
+					System.out.println("Incorrect!");
+					gameover();
+					break;
+				}
 			}
 			
 			System.out.println();
 		}
 	}
+	
 	
 	public boolean isEnd()
 	{
@@ -90,17 +100,25 @@ public class HighLow extends JFrame implements ActionListener, KeyListener
 	
 	public void gameover()
 	{
-		System.out.println();
 		System.out.println("Next card was "+stackDeck.peek());
 		
 		System.out.println();
 		System.out.println("Score: "+stackGame.size());
 		System.out.println("Game Over");
-		
-		System.out.println("Play Again?");
+		System.out.println();
+		System.out.print("Play Again? ");
 		String answer = keyboard.next();
+		
+		while(!answer.equals("yes")&&!answer.equals("no")){
+			System.out.println("Invalid Input");
+			System.out.println();
+			System.out.print("Play Again? ");
+			answer = keyboard.next();
+		}
+		
 		if(answer.equals("yes")){
 			stackGame.clear();
+			System.out.println();
 			game();
 		}else{
 			System.exit(0);
@@ -109,53 +127,37 @@ public class HighLow extends JFrame implements ActionListener, KeyListener
 	
 	public void gui()
 	{
-		Container pane = getContentPane();
-		FlowLayout flo = new FlowLayout();
+		GridLayout grid = new GridLayout(0,2);
+		final Container pane = getContentPane();
 		
 		setTitle("HighLow");
 		setLocation(200,200);
+		setResizable(false);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		
-		JPanel title = new JPanel();
-		JPanel game = new JPanel();
+		final JPanel game = new JPanel();
+		game.setLayout(grid);
+		JPanel controls = new JPanel();
+		controls.setLayout(new GridLayout(2,3));
 		
-		JButton high = new JButton("High");
-		JButton low = new JButton("Low");
+		game.setPreferredSize(new Dimension(100,100));
 		
-		JLabel label0 = new JLabel("Level0");
 		
-		pane.setLayout(flo);
-		title.add(label0);
 		
-		pane.add(title);
-		pane.add(game);
-		pane.add(high);
-		pane.add(low);
 		
-		addKeyListener(this);
+		game.add(new JButton("High"));
+		game.add(new JButton("Low"));
+		
+		pane.add(game,BorderLayout.NORTH);
+		
+		
+		game.getInputMap().put(KeyStroke.getKeyStroke("ESC"),null);
 		
 		pack();
 		setVisible(true);
 	}
 
 	public void actionPerformed(ActionEvent e)
-	{
-		
-	}
-
-	public void keyPressed(KeyEvent e)
-	{
-		if(e.getKeyCode()==KeyEvent.VK_ESCAPE){
-			System.exit(0);
-		}
-	}
-
-	public void keyReleased(KeyEvent e)
-	{
-		
-	}
-
-	public void keyTyped(KeyEvent e)
 	{
 		
 	}
