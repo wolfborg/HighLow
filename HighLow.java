@@ -1,34 +1,41 @@
 package HighLow;
 
 import javax.imageio.ImageIO;
+
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JLabel;
 
-import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.Container;
-import java.awt.Dimension;
-import java.awt.Graphics;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
+
 import java.io.File;
 import java.io.IOException;
 
-@SuppressWarnings("serial")
+/*****************************************************************************
+ * HighLow
+ * 
+ * A card game in which the goal is to guess whether the next card will be 
+ * higher or lower than the current card. If the user reaches the end of the 
+ * deck, the game is won. All ties are considered round wins and Aces are the
+ * highest value.
+ * 
+ * @version 1.0
+ * @author Derek Chaplin
+ *****************************************************************************/
 public class HighLow extends JFrame implements ActionListener
 {
-	private BufferedImage bigImg;
+	private static final long serialVersionUID = 6388741306888480015L;
 	private BufferedImage[][] sprites;
-	private ImageIcon cardIcon;
-	private Deck deck;
+	private Deck deck = new Deck();
 	private StackInterface<Card> stackDeck;
-	private StackInterface<Card> stackGame;
+	private StackInterface<Card> stackGame = new ArrayStack<Card>(52);
 	private String guess, answer;
 	private Card currentCard, nextCard;
 	private int score;
@@ -40,7 +47,6 @@ public class HighLow extends JFrame implements ActionListener
 	private JButton low = new JButton("Low");
 	private JButton playagain = new JButton("Play Again");
 	private JPanel controls = new JPanel();
-	private Container pane = getContentPane();
 	private String defaultText = "<html><body><center>"
 			+ "Guess whether the next card will be high or low. Make it through the entire deck and you win!<br>"
 			+ "All tie results are correct answers and Aces are the highest value.<br>"
@@ -48,15 +54,27 @@ public class HighLow extends JFrame implements ActionListener
 	
 	public static void main(String[] args) throws IOException
 	{
-		new HighLow();
+		//Deck image: 4200 width, 1600 height 
+		//Each card: 300 width, 400 height
+		String fileName = "Comp310/HighLow/cardsoriginal.png";
+		int width = 300;
+		int height = 400;
+		
+		new HighLow(fileName,width,height);
 	}
 	
-	public HighLow() throws IOException
+	/*****************************************************************************
+	 * Creates HighLow game in which the goal is to guess whether the next card
+	 * is high or low until they either guess incorrectly or reach the end of
+	 * the card deck, which has the standard 52 cards in it.
+	 * @param fileName	Name of the deck image file.
+	 * @param width		Desired width of each card.
+	 * @param height	Desired height of each card.
+	 *****************************************************************************/
+	public HighLow(String fileName, int width, int height) throws IOException
 	{ 
-		bigImg = ImageIO.read(new File("Comp310/HighLow/cards original.png"));
-		generateDeckImages(bigImg);
-		deck = new Deck();
-		stackGame = new ArrayStack<Card>(52);
+		sprites = generateDeckImages(ImageIO.read(new File(fileName)),width,height);
+		
 		high.addActionListener(this);
 		low.addActionListener(this);
 		playagain.addActionListener(this);
@@ -65,96 +83,117 @@ public class HighLow extends JFrame implements ActionListener
 		gui();
 	}
 	
-	public void generateDeckImages(BufferedImage bigImg)
+	
+	/*****************************************************************************
+	 * Splits a card deck BufferedImage sprite sheet into equally sized subimages.
+	 * @param bigImg	BufferedImage of deck to split.
+	 * @param width		Desired width of each card.
+	 * @param height	Desired height of each card.
+	 * @return 			2D BufferedImage array
+	 ******************************************************************************/
+	public BufferedImage[][] generateDeckImages(BufferedImage bigImg, int width, int height)
 	{
-		int width = 300;
-		int height = 400;
-		int rows = 4;
-		int cols = 14;
+		int cols = bigImg.getWidth() / width;
+		int rows = bigImg.getHeight() / height;
 		
-		//4200 width, 1600 height for big image
-		//300 width, 400 height for cards
-		sprites = new BufferedImage[rows+1][cols+1];
+		BufferedImage[][] sprites = new BufferedImage[rows+1][cols+1];
 		
-		for(int i=0;i<rows;i++){
-			for(int j=0;j<cols;j++){
+		for(int i=0;i<rows;i++)
+		{
+			for(int j=0;j<cols;j++)
+			{
 				sprites[i][j] = bigImg.getSubimage(j*width, i*height, width, height);
 			}
 		}
+		
+		return sprites;
 	}
 	
+	/*****************************************************************************
+	 * Starts a new game.
+	 *****************************************************************************/
 	public void game()
 	{
+		score = 0;
 		stackDeck = deck.shuffle();
-		nextRound();
+		gameRound();
 	}
 	
-	
-	
-	public String checkNext()
-	{
-		if(nextCard.getRank().getRankValue()<currentCard.getRank().getRankValue()){
-			return "low";
-		}else if(nextCard.getRank().getRankValue()>currentCard.getRank().getRankValue()){
-			return "high";
-		}else{
-			return "tie";
-		}
-	}
-	
-	public boolean checkCorrect()
-	{
-		gameText.setText(stackDeck.peek().toString());
-		if(answer.equals("tie")){
-			gameText.setText(gameText.getText()+": Tied");
-			score++;
-			return true;
-		}else{
-			if(guess.equals(answer)){
-				gameText.setText(gameText.getText()+": Correct");
-				score++;
-				return true;
-			}else{
-				gameText.setText("<html><body><center>"+gameText.getText()+": Incorrect <br>");
-				return false;
-			}
-		}
-	}
-	
-	public void nextRound()
+	/*****************************************************************************
+	 * Shows current card and asks for high or low guess.
+	 *****************************************************************************/
+	public void gameRound()
 	{
 		stackGame.push(stackDeck.peek());
 		stackDeck.pop();
 		
+		scoreLabel.setText("Score: "+score);
 		currentCard = stackGame.peek();
 		nextCard = stackDeck.peek();
 		
-		//current.setText(currentCard.toString());
-		//next.setText("next");
-		scoreLabel.setText("Score: "+score);
+		int currentCardValue = currentCard.getRank().getRankValue();
+		int nextCardValue = nextCard.getRank().getRankValue();
 		
-		answer = checkNext();
+		if(nextCardValue<currentCardValue)
+		{
+			answer = "low";
+		}
+		else if(nextCardValue>currentCardValue)
+		{
+			answer = "high";
+		}
+		else
+		{
+			answer = "tie";
+		}
 	}
 	
-	public boolean isEnd()
+	/*****************************************************************************
+	 * @return	Boolean for if guess is equal to the answer.
+	 *****************************************************************************/
+	public boolean isCorrect()
 	{
-		if(stackGame.size()==52){
-			victory();
+		gameText.setText(stackDeck.peek().toString());
+		if(answer.equals("tie"))
+		{
+			gameText.setText(gameText.getText()+": Tied");
+			score++;
 			return true;
 		}
+		else
+		{
+			if(guess.equals(answer))
+			{
+				gameText.setText(gameText.getText()+": Correct");
+				score++;
+				
+				if(score==51)
+				{
+					gameText.setText("<html><body><center>You Win!<br>");
+					next.setPreferredSize(next.getPreferredSize());
+					next.setIcon(null);
+					next.setHorizontalAlignment(JLabel.CENTER);
+					next.setText("Deck Empty");
+					gameover();
+				}
+				
+				return true;
+			}
+			else
+			{
+				gameText.setText("<html><body><center>"+gameText.getText()+": Incorrect <br>");
+				return false;
+			}
+		}
 		
-		return false;
+		
 	}
 	
-	public void victory()
-	{
-		gameText.setText("You Win!");
-	}
-	
+	/*****************************************************************************
+	 * Declares the game is over and enables the playagain button.
+	 *****************************************************************************/
 	public void gameover()
 	{
-		next.setIcon(new ImageIcon(stackDeck.peek().getCardImage(sprites)));
-		//next.setText(stackDeck.peek().toString());
 		gameText.setText(gameText.getText()+"Game Over</center></body></html>");
 		
 		high.setEnabled(false);
@@ -169,63 +208,56 @@ public class HighLow extends JFrame implements ActionListener
 		repaint();
 	}
 	
+	/*****************************************************************************
+	 * Creates the GUI for the HighLow game.
+	 *****************************************************************************/
 	public void gui()
 	{
+		Container pane = getContentPane();
 		setTitle("HighLow");
 		setLocation(200,200);
 		setResizable(false);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		
+		//gridbag
 		GridBagLayout grid = new GridBagLayout();
 		GridBagConstraints c = new GridBagConstraints();
 		setLayout(grid);
-		//setPreferredSize(new Dimension(500,400));
 		c.weightx = 0.5;
 
-		scoreLabel.setHorizontalAlignment(JLabel.CENTER);
-		
 		//score
+		scoreLabel.setHorizontalAlignment(JLabel.CENTER);
 		c.fill = GridBagConstraints.HORIZONTAL;
 		c.ipady = 20;
 		c.gridx = 0;
 		c.gridy = 0;
 		pane.add(scoreLabel,c);
 		
-		gameText.setHorizontalAlignment(JLabel.CENTER);
-		gameText.setText(defaultText);
-		gameText.setPreferredSize(gameText.getPreferredSize());
-		
 		//gameText
+		gameText.setText(defaultText);
+		gameText.setHorizontalAlignment(JLabel.CENTER);
+		gameText.setPreferredSize(gameText.getPreferredSize());
 		c.fill = GridBagConstraints.HORIZONTAL;
 		c.gridx = 0;
 		c.gridy = 1;
 		pane.add(gameText,c);
 		
+		//cards
 		final JPanel game = new JPanel();
-		current.setBackground(Color.WHITE);
-		next.setBackground(Color.LIGHT_GRAY);
+		current.setIcon(new ImageIcon(currentCard.getCardImage(sprites)));
+		next.setIcon((new ImageIcon(sprites[1][0])));
 		game.add(current);
 		game.add(next);
-		
-		cardIcon = new ImageIcon(currentCard.getCardImage(sprites));
-		current.setIcon(cardIcon);
-		
-		next.setIcon((new ImageIcon(sprites[1][0])));
-		
-		//cards
 		c.fill = GridBagConstraints.HORIZONTAL;
 		c.gridx = 0;
 		c.gridy = 2;
 		pane.add(game,c);
 		
+		//controls
 		controls.setLayout(new GridBagLayout());
-		
 		controls.add(high);
 		controls.add(low);
-		
-		//controls
 		c.fill = GridBagConstraints.HORIZONTAL;
-		c.ipadx = 0;
 		c.ipady = 0;
 		c.gridwidth = 2;
 		c.gridx = 0;
@@ -235,27 +267,20 @@ public class HighLow extends JFrame implements ActionListener
 		pack();
 		setVisible(true);
 	}
-
+	
+	/*****************************************************************************
+	 * Performs actions based on events sent from the GUI.
+	 * @param e	Action caused by the GUI.
+	 *****************************************************************************/
 	public void actionPerformed(ActionEvent e)
 	{
-		if(e.getActionCommand().equals("High")){
-			guess = "high";
+		if(e.getActionCommand().equals("High")||e.getActionCommand().equals("Low")){
+			guess = e.getActionCommand().toLowerCase();
 			
-			if(checkCorrect()){
-				if(!isEnd()){
-					nextRound();
-				}
+			if(isCorrect()){
+				gameRound();
 			}else{
-				gameover();
-			}
-		}else if(e.getActionCommand().equals("Low")){
-			guess = "low";
-			
-			if(checkCorrect()){
-				if(!isEnd()){
-					nextRound();
-				}
-			}else{
+				next.setIcon(new ImageIcon(stackDeck.peek().getCardImage(sprites)));
 				gameover();
 			}
 		}else if(e.getActionCommand().equals("Play Again")){
@@ -272,12 +297,8 @@ public class HighLow extends JFrame implements ActionListener
 			repaint();
 			game();
 		}
-		
-		
-		//current.add(new JLabel(new ImageIcon(getCardImage())));
 
-		cardIcon.setImage(currentCard.getCardImage(sprites));
+		((ImageIcon)current.getIcon()).setImage(currentCard.getCardImage(sprites));
 		repaint();
-		revalidate();
 	}
 }
