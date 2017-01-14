@@ -56,7 +56,7 @@ public class HighLow extends JFrame implements ActionListener
 	{
 		//Deck image: 4200 width, 1600 height 
 		//Each card: 300 width, 400 height
-		String fileName = "Comp310/HighLow/cardsoriginal.png";
+		String fileName = "cardsoriginal.png";
 		int width = 300;
 		int height = 400;
 		
